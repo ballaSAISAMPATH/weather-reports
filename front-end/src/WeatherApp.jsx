@@ -27,6 +27,10 @@ const WeatherApp = () => {
           city: data.name,
           country: data.sys.country,
           icon: data.weather[0].icon,
+          sunrise: data.sys.sunrise,
+          sunset: data.sys.sunset,
+          timezone: data.timezone,
+          date: new Date((data.dt + data.timezone) * 1000),
         });
       } else {
         setError(data.message);
@@ -42,23 +46,34 @@ const WeatherApp = () => {
     }
   };
 
+  // Helper to format date/time in location timezone nicely
+  const formatDate = (date) =>
+    date.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
+
+  const formatTime = (date) =>
+    date.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
+
   return (
     <div
       style={{
-        maxWidth: 450,
-        margin: "50px auto",
-        padding: "30px 25px",
-        borderRadius: 15,
-        background: "linear-gradient(135deg, #74ebd5 0%, #ACB6E5 100%)",
-        color: "#333",
+        maxWidth: 480,
+        margin: "40px auto",
+        padding: 30,
+        borderRadius: 20,
+        background: "linear-gradient(145deg, #536976, #292e49)",
+        color: "#e0e6f1",
         fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-        boxShadow: "0 8px 20px rgba(0,0,0,0.2)",
+        boxShadow: "0 15px 40px rgba(0,0,0,0.6)",
+        minHeight: 600,
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-between",
       }}
     >
-      <h1 style={{ textAlign: "center", marginBottom: 30, color: "#0d47a1" }}>
-        Weather App
+      <h1 style={{ textAlign: "center", marginBottom: 30, fontWeight: "900", fontSize: 34 }}>
+        Weather Forecast
       </h1>
-      <div style={{ display: "flex", justifyContent: "center", gap: "10px", marginBottom: 20 }}>
+      <div style={{ display: "flex", gap: 15, marginBottom: 25 }}>
         <input
           type="text"
           placeholder="Enter city"
@@ -66,36 +81,50 @@ const WeatherApp = () => {
           onChange={(e) => setLocation(e.target.value)}
           onKeyPress={handleKeyPress}
           style={{
-            flexGrow: 1,
-            padding: "10px 15px",
-            borderRadius: 25,
+            flex: 1,
+            padding: "14px 20px",
+            borderRadius: 30,
             border: "none",
             outline: "none",
-            fontSize: 16,
+            fontSize: 18,
+            boxShadow: "inset 3px 3px 6px #4a5270, inset -3px -3px 6px #5e6a92",
+            backgroundColor: "#42506c",
+            color: "#f0f4ff",
           }}
         />
         <button
           onClick={fetchWeather}
           style={{
-            padding: "10px 20px",
-            borderRadius: 25,
+            padding: "14px 28px",
+            borderRadius: 30,
             border: "none",
-            backgroundColor: "#0d47a1",
+            backgroundColor: "#f76c6c",
             color: "white",
             fontWeight: "bold",
+            fontSize: 18,
             cursor: "pointer",
-            boxShadow: "0 4px 10px rgba(13, 71, 161, 0.5)",
-            transition: "background-color 0.3s ease",
+            boxShadow: "0 6px 12px rgba(247,108,108,0.7)",
+            transition: "background-color 0.25s ease",
           }}
-          onMouseEnter={(e) => (e.target.style.backgroundColor = "#093973")}
-          onMouseLeave={(e) => (e.target.style.backgroundColor = "#0d47a1")}
+          onMouseEnter={(e) => (e.target.style.backgroundColor = "#f82a2a")}
+          onMouseLeave={(e) => (e.target.style.backgroundColor = "#f76c6c")}
         >
           Get Weather
         </button>
       </div>
 
       {error && (
-        <p style={{ color: "#b71c1c", fontWeight: "bold", textAlign: "center" }}>
+        <p
+          style={{
+            backgroundColor: "#f44336",
+            padding: "10px 15px",
+            borderRadius: 12,
+            color: "white",
+            fontWeight: "700",
+            textAlign: "center",
+            marginBottom: 20,
+          }}
+        >
           {error.charAt(0).toUpperCase() + error.slice(1)}
         </p>
       )}
@@ -103,35 +132,118 @@ const WeatherApp = () => {
       {weather && (
         <div
           style={{
-            marginTop: 30,
-            padding: 20,
+            backgroundColor: "#394263",
             borderRadius: 20,
-            backgroundColor: "rgba(255, 255, 255, 0.8)",
-            boxShadow: "0 4px 15px rgba(0,0,0,0.1)",
-            textAlign: "center",
+            padding: 25,
+            boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
+            flexGrow: 1,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-around",
           }}
         >
-          <h2>
-            {weather.city}, {weather.country}
-          </h2>
-          <img
-            src={`https://openweathermap.org/img/wn/${weather.icon}@4x.png`}
-            alt={weather.description}
-            style={{ width: 100, height: 100 }}
-          />
-          <p style={{ fontSize: 48, fontWeight: "bold", margin: "10px 0" }}>
-            {Math.round(weather.temp)}°C
-          </p>
-          <p style={{ fontSize: 20, fontStyle: "italic", marginBottom: 10 }}>
-            {weather.description.charAt(0).toUpperCase() + weather.description.slice(1)}
-          </p>
-          <p>Feels Like: {Math.round(weather.feels_like)}°C</p>
-          <p>Humidity: {weather.humidity} %</p>
-          <p>Wind Speed: {weather.wind} m/s</p>
+          <div style={{ textAlign: "center" }}>
+            <h2 style={{ fontSize: 30, fontWeight: "bold" }}>
+              {weather.city}, {weather.country}
+            </h2>
+            <p style={{ fontSize: 16, fontWeight: "500", marginTop: 4 }}>
+              {formatDate(weather.date)} | Local Time: {formatTime(weather.date)}
+            </p>
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              gap: 30,
+              marginTop: 10,
+              marginBottom: 20,
+            }}
+          >
+            <div
+              style={{
+                backgroundColor: "#f7b733",
+                borderRadius: "50%",
+                width: 140,
+                height: 140,
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                boxShadow: "0 8px 20px #f7b733aa",
+              }}
+            >
+              <img
+                src={`https://openweathermap.org/img/wn/${weather.icon}@4x.png`}
+                alt={weather.description}
+                style={{ width: 100, height: 100 }}
+                draggable={false}
+              />
+            </div>
+
+            <div style={{ color: "#fff", textAlign: "left" }}>
+              <p style={{ fontSize: 50, margin: 0, fontWeight: "900" }}>
+                {Math.round(weather.temp)}°C
+              </p>
+              <p style={{ fontSize: 22, fontStyle: "italic", marginTop: 6 }}>
+                {weather.description.charAt(0).toUpperCase() + weather.description.slice(1)}
+              </p>
+              <p style={{ marginTop: 20 }}>
+                Feels Like: <b>{Math.round(weather.feels_like)}°C</b>
+              </p>
+            </div>
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-around",
+              fontSize: 18,
+              color: "#d1d9ff",
+            }}
+          >
+            <div>
+              <p>Humidity</p>
+              <p style={{ fontWeight: "bold", fontSize: 20 }}>{weather.humidity}%</p>
+            </div>
+            <div>
+              <p>Wind Speed</p>
+              <p style={{ fontWeight: "bold", fontSize: 20 }}>{weather.wind} m/s</p>
+            </div>
+            <div>
+              <p>Sunrise</p>
+              <p style={{ fontWeight: "bold", fontSize: 20 }}>
+                {formatTime(new Date((weather.sunrise + weather.timezone) * 1000))}
+              </p>
+            </div>
+            <div>
+              <p>Sunset</p>
+              <p style={{ fontWeight: "bold", fontSize: 20 }}>
+                {formatTime(new Date((weather.sunset + weather.timezone) * 1000))}
+              </p>
+            </div>
+          </div>
         </div>
       )}
-      <footer style={{ marginTop: 40, fontSize: 14, color: "#555", textAlign: "center" }}>
-        Powered by OpenWeatherMap API
+
+      <footer
+        style={{
+          marginTop: 40,
+          fontSize: 14,
+          color: "#8391a1",
+          textAlign: "center",
+          userSelect: "none",
+        }}
+      >
+        Powered by{" "}
+        <a
+          href="https://openweathermap.org/"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ color: "#f76c6c", textDecoration: "none", fontWeight: "bold" }}
+        >
+          OpenWeatherMap
+        </a>
       </footer>
     </div>
   );
